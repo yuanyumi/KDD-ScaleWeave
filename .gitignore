@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+checkpoints/*
+!checkpoints/.gitkeep
+
+# training / evaluation outputs
+*_results/
+run_logs/
+*.log

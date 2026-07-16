@@ -1,0 +1,14 @@
+# Core runtime dependencies for ScaleWeave.
+#
+# IMPORTANT: install PyTorch FIRST, matched to your CUDA version (see README.md),
+# because the correct build cannot be selected from PyPI alone. Example (CUDA 12.1):
+#   pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+#
+# The versions below are the exact ones the released numbers were produced with
+# (Python 3.8). Looser pins usually work, but these are the tested configuration.
+numpy==1.22.4
+pandas==1.4.2
+scikit-learn==1.0.2
+einops==0.8.1
+matplotlib==3.5.1
+tqdm==4.67.3

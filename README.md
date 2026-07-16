@@ -29,4 +29,3 @@ bash scripts/multivariate_zero_shot/ETTh1_ETTh2.sh
 bash scripts/univariate_zero_shot/m3_to_m4.sh
 bash scripts/other_univariate_short_term_forecasting/M1/M1_Yearly.sh
 ```
-# KDD-ScaleWeave
