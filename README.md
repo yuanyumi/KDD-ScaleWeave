@@ -22,8 +22,8 @@ conda activate scaleweave
 bash scripts/long_term_forecasting/ETTh1/ETTh1_96.sh
 bash scripts/long_term_forecasting/Flight/Flight_96.sh
 bash scripts/long_term_forecasting/ILI/ILI_24.sh
-bash scripts/short_term_forecasting/Cars/Cars_h24.sh
-bash scripts/m4_forecasting/M4/M4.sh
+bash scripts/multivariate_short_term_forecasting/Cars/Cars_h24.sh
+bash scripts/univariate_short_term_forecasting/M4/M4.sh
 bash scripts/few_shot_forecasting/ETTh1/ETTh1_96.sh
 bash scripts/multivariate_zero_shot/ETTh1_ETTh2.sh
 bash scripts/univariate_zero_shot/m3_to_m4.sh
