@@ -1,4 +1,4 @@
-# ScaleWeave: Scale-Coupled Hypergraph for Multivariate Time Series Forecasting
+# ScaleWeave: Weaving Variable Relations Across Temporal Scales for Multivariate Time Series Forecasting
 
 ## Environment
 
