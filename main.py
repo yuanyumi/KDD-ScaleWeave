@@ -24,7 +24,7 @@ torch.set_num_threads(4)
 def remove_directory_if_exists(path):
     if os.path.exists(path):
         shutil.rmtree(path)
-        print(f"Dir '{path}' deleted。")
+        print(f"Dir '{path}' deleted.")
     else:
         print(f"Dir '{path}' does not exist.")
 
