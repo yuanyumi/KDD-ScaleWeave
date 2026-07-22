@@ -70,7 +70,7 @@ def build_parser():
     p.add_argument('--transformer_ff_inner', type=int, default=128)
     p.add_argument('--scale_patch_sizes', type=str, default='2 4 6')
     p.add_argument('--scale_strides', type=str, default='2 4 6')
-    p.add_argument('--hsg_layers', type=int, default=2)
+    p.add_argument('--sch_layers', type=int, default=2)
     p.add_argument('--cross_scale_g', type=int, default=1)
     p.add_argument('--g_gate', type=int, default=1)
     p.add_argument('--learned_hyperedge_weights', type=int, default=0)
@@ -78,7 +78,7 @@ def build_parser():
     p.add_argument('--gate_init_prg', type=float, default=0.5)
     p.add_argument('--fname', type=str, default='./checkpoints/hospital')
     p.add_argument('--wd_project', type=str, default='hospital')
-    p.add_argument('--run_name', type=str, default='hsg_hospital')
+    p.add_argument('--run_name', type=str, default='scaleweave_hospital')
     p.add_argument('--itr', type=int, default=1)
     return p
 

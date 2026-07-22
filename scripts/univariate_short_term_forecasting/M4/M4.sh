@@ -5,7 +5,7 @@ python -u main_m4.py \
  \
  --d_model 128 --d_ff 256 --n_heads 16 --e_layers 3 \
  --dropout 0.1 --in_dropout 0.1 --out_dropout 0.1 \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 \
  --scale_patch_sizes "1 4 12" --scale_strides "1 4 12" \
  --multi 0 --revin_flag 0 --seed 42 --model ScaleWeave
 
@@ -17,7 +17,7 @@ python -u main_m4.py \
  \
  --d_model 128 --d_ff 256 --n_heads 16 --e_layers 3 \
  --dropout 0.1 --in_dropout 0.1 --out_dropout 0.1 \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 \
  --scale_patch_sizes "4 8 16" --scale_strides "4 8 16" \
  --multi 0 --revin_flag 0 --seed 42 --model ScaleWeave
 
@@ -29,7 +29,7 @@ python -u main_m4.py \
  \
  --d_model 128 --d_ff 256 --n_heads 16 --e_layers 3 \
  --dropout 0.05 --in_dropout 0.05 --out_dropout 0.05 \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 \
  --scale_patch_sizes "3 7 14" --scale_strides "3 7 14" \
  --multi 0 --revin_flag 1 --seed 42 --model ScaleWeave
 
@@ -40,7 +40,7 @@ python -u main_m4.py \
  \
  --d_model 128 --d_ff 256 --n_heads 16 --e_layers 3 \
  --dropout 0.0 --in_dropout 0.0 --out_dropout 0.0 \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 \
  --scale_patch_sizes "12 24 48" --scale_strides "6 12 24" \
  --multi 0 --revin_flag 1 --seed 42 --model ScaleWeave
 
@@ -51,7 +51,7 @@ python -u main_m4.py \
  \
  --d_model 128 --d_ff 256 --n_heads 16 --e_layers 3 \
  --dropout 0.0 --in_dropout 0.0 --out_dropout 0.0 \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 \
  --scale_patch_sizes "3 7 14" --scale_strides "2 4 7" \
  --multi 0 --revin_flag 1 --seed 42 --model ScaleWeave
 
@@ -62,7 +62,7 @@ python -u main_m4.py \
  \
  --d_model 128 --d_ff 256 --n_heads 16 --e_layers 3 \
  --dropout 0.0 --in_dropout 0.0 --out_dropout 0.0 \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 \
  --scale_patch_sizes "3 6 13" --scale_strides "3 6 7" \
  --multi 0 --revin_flag 1 --seed 42 --model ScaleWeave
 

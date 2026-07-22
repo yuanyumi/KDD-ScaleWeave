@@ -94,7 +94,7 @@ def build_parser():
     p.add_argument('--embed', type=str, default='timeF')
     p.add_argument('--scale_patch_sizes', type=str, default='2 4 6')
     p.add_argument('--scale_strides', type=str, default='2 4 6')
-    p.add_argument('--hsg_layers', type=int, default=2)
+    p.add_argument('--sch_layers', type=int, default=2)
     p.add_argument('--cross_scale_g', type=int, default=1)
     p.add_argument('--g_gate', type=int, default=1)
     p.add_argument('--learned_hyperedge_weights', type=int, default=0)

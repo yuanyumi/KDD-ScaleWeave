@@ -13,7 +13,7 @@ python main.py \
   --features=M \
   --freq=h \
   --g_gate=1 \
-  --hsg_layers=1 \
+  --sch_layers=1 \
   --in_dropout=0.05 \
   --itr=1 \
   --label_len=0 \

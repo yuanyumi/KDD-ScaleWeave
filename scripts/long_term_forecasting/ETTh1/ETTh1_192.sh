@@ -20,7 +20,7 @@ python main.py \
     --transformer_ff_inner=256 \
     --scale_patch_sizes="8 16 32" \
     --scale_strides="8 16 32" \
-    --hsg_layers=2 \
+    --sch_layers=2 \
     --dropout=0.1 \
     --patience=20 \
     --pred_len=192 \

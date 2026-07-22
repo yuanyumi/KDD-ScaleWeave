@@ -123,7 +123,7 @@ class ScaleCoupledHypergraph(nn.Module):
         self,
         d_model: int,
         num_scales: int,
-        hsg_layers: int,
+        sch_layers: int,
         gate_init: float = 0.5,
         dropout: float = 0.1,
         use_cross_scale_g: bool = True,
@@ -133,7 +133,7 @@ class ScaleCoupledHypergraph(nn.Module):
         super().__init__()
         self.d_model = d_model
         self.num_scales = num_scales
-        self.hsg_layers = hsg_layers
+        self.sch_layers = sch_layers
         self.use_learned_v_pool = use_learned_v_pool
 
         self.layers = nn.ModuleList([
@@ -143,7 +143,7 @@ class ScaleCoupledHypergraph(nn.Module):
                 use_cross_scale_g=use_cross_scale_g,
                 use_g_gate=use_g_gate,
             )
-            for _ in range(hsg_layers)
+            for _ in range(sch_layers)
         ])
 
         self.v_scale_bias = nn.Parameter(torch.zeros(num_scales, d_model))
@@ -228,7 +228,7 @@ class ScaleWeaveEncoder(nn.Module):
         self.sch = ScaleCoupledHypergraph(
             d_model=args.d_model,
             num_scales=args.num_scales,
-            hsg_layers=args.hsg_layers,
+            sch_layers=args.sch_layers,
             gate_init=args.gate_init_prg,
             dropout=args.dropout,
             use_cross_scale_g=bool(getattr(args, 'cross_scale_g', 1)),
@@ -301,7 +301,7 @@ class ScaleWeave(nn.Module):
             "scale_patch_sizes and scale_strides must have the same length"
         self.num_scales = len(self.scale_patch_sizes)
         configs.num_scales = self.num_scales
-        configs.hsg_layers = getattr(configs, 'hsg_layers', 2)
+        configs.sch_layers = getattr(configs, 'sch_layers', 2)
 
         self.patch_nums = [
             (configs.seq_len - p) // s + 2

@@ -13,7 +13,7 @@ CUDA_VISIBLE_DEVICES=${GPU:-0} python -u main_zero_shot_m.py \
  --loss SMAPE --lradj COS --tmax 20 \
  --dropout 0.10 --in_dropout 0.10 --out_dropout 0.10 \
  --scale_patch_sizes "1 4 12" --scale_strides "1 4 12" \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
  --num_workers 8 --out_dir $OUT --tag m4y_to_m3y \
  --seed 2021
 
@@ -27,7 +27,7 @@ CUDA_VISIBLE_DEVICES=${GPU:-0} python -u main_zero_shot_m.py \
  --loss SMAPE --lradj COS --tmax 20 \
  --dropout 0.10 --in_dropout 0.10 --out_dropout 0.10 \
  --scale_patch_sizes "2 4 8" --scale_strides "1 2 4" \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
  --num_workers 4 --out_dir $OUT --tag m4q_to_m3q \
  --seed 2021
 
@@ -41,7 +41,7 @@ CUDA_VISIBLE_DEVICES=${GPU:-0} python -u main_zero_shot_m.py \
  --loss SMAPE --lradj COS --tmax 15 \
  --dropout 0.10 --in_dropout 0.10 --out_dropout 0.10 \
  --scale_patch_sizes "3 6 12" --scale_strides "3 6 12" \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
  --num_workers 8 --out_dir $OUT --tag m4m_to_m3m \
  --seed 2021
 
@@ -55,7 +55,7 @@ CUDA_VISIBLE_DEVICES=${GPU:-0} python -u main_zero_shot_m.py \
  --loss SMAPE --lradj COS --tmax 20 \
  --dropout 0.05 --in_dropout 0.05 --out_dropout 0.05 \
  --scale_patch_sizes "3 6 12" --scale_strides "1 2 4" \
- --hsg_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
+ --sch_layers 2 --cross_scale_g 1 --g_gate 1 --revin_flag 0 \
  --num_workers 4 --out_dir $OUT --tag m4q_to_m3o \
  --seed 2021
 

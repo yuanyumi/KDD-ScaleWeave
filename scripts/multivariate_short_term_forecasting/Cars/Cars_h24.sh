@@ -19,7 +19,7 @@ python main.py \
     --out_dropout=0.1 \
     --scale_patch_sizes="4 8 16" \
     --scale_strides="4 8 16" \
-    --hsg_layers=2 \
+    --sch_layers=2 \
     --dropout=0.1 \
     --transformer_ff_inner=256 \
     --patience=20 \

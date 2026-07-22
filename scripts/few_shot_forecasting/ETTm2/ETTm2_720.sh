@@ -13,7 +13,7 @@ python main.py \
     --few_shot_order=front \
     --freq=0 \
     --g_gate=1 \
-    --hsg_layers=2 \
+    --sch_layers=2 \
     --in_dropout=0.0 \
     --itr=1 \
     --label_len=0 \

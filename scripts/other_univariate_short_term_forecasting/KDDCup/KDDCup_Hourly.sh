@@ -5,7 +5,7 @@ python -u main_kdd_cup.py \
   --learning_rate 2.2e-3 --loss SMAPE --lradj COS --tmax 20 --eta_min 1e-8 \
   --d_model 128 --d_ff 256 --n_heads 16 --e_layers 3 --transformer_ff_inner 256 \
   --dropout 0.1 --in_dropout 0.1 --out_dropout 0.1 \
-  --hsg_layers 2 --cross_scale_g 1 --g_gate 1 \
+  --sch_layers 2 --cross_scale_g 1 --g_gate 1 \
   --learned_hyperedge_weights 0 \
   --scale_patch_sizes "12 48 168" --scale_strides "12 48 168" \
   --multi 0 --revin_flag 1 \

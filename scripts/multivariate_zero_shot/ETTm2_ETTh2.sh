@@ -18,7 +18,7 @@ python main.py \
     --out_dropout=0.1 \
     --scale_patch_sizes="8 16 32" \
     --scale_strides="8 16 32" \
-    --hsg_layers=2 \
+    --sch_layers=2 \
     --dropout=0.1 \
     --transformer_ff_inner=256 \
     --cross_scale_g=1 \
@@ -52,7 +52,7 @@ python main.py \
     --out_dropout=0.1 \
     --scale_patch_sizes="8 16 32" \
     --scale_strides="8 16 32" \
-    --hsg_layers=2 \
+    --sch_layers=2 \
     --dropout=0.1 \
     --transformer_ff_inner=256 \
     --cross_scale_g=1 \
@@ -86,7 +86,7 @@ python main.py \
     --out_dropout=0.1 \
     --scale_patch_sizes="8 16 32" \
     --scale_strides="8 16 32" \
-    --hsg_layers=2 \
+    --sch_layers=2 \
     --dropout=0.1 \
     --transformer_ff_inner=256 \
     --cross_scale_g=1 \
@@ -120,7 +120,7 @@ python main.py \
     --out_dropout=0.1 \
     --scale_patch_sizes="8 16 32" \
     --scale_strides="8 16 32" \
-    --hsg_layers=2 \
+    --sch_layers=2 \
     --dropout=0.1 \
     --transformer_ff_inner=256 \
     --cross_scale_g=1 \
