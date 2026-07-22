@@ -1,5 +1,3 @@
-# Hospital summary utility — SMAPE-only.
-# Mirrors utils/m3_summary.py; no "Other" subset.
 
 import os
 from collections import OrderedDict

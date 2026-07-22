@@ -1,6 +1,3 @@
-# M3 Dataset loader for short-term forecasting.
-# Format follows Monash .tsf (https://forecastingdata.org/).
-# Mirrors data_provider/m4.py so Dataset_M3 / M3Summary can be near-clones.
 
 import os
 from dataclasses import dataclass
@@ -25,8 +22,6 @@ class M3Meta:
     frequency_map = {
         'Yearly': 1, 'Quarterly': 4, 'Monthly': 12, 'Other': 1,
     }
-    # window_sampling_limit = history_size * pred_len in Dataset_M3.
-    # M3 series are short (Yearly avg ~22 pts), so keep N-BEATS-style 1.5.
     history_size = {
         'Yearly': 1.5, 'Quarterly': 1.5, 'Monthly': 1.5, 'Other': 1.5,
     }
@@ -82,10 +77,10 @@ class M3Dataset:
     last-`horizon` window (training=False) of series i.
     """
     ids: np.ndarray
-    groups: np.ndarray         # seasonal pattern per series
-    frequencies: np.ndarray    # int frequency per series (1/4/12)
-    horizons: np.ndarray       # int horizon per series
-    values: np.ndarray         # object array of 1-D float32 arrays
+    groups: np.ndarray
+    frequencies: np.ndarray
+    horizons: np.ndarray
+    values: np.ndarray
 
     @staticmethod
     def load(training: bool = True, dataset_file: str = './datasets/m3') -> 'M3Dataset':
@@ -97,7 +92,6 @@ class M3Dataset:
             freq = M3Meta.frequency_map[sp]
             for sid, s in zip(ids, series):
                 if len(s) <= h:
-                    # series too short to evaluate — skip
                     continue
                 if training:
                     arr = s[:-h]

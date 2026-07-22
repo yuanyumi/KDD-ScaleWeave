@@ -1,5 +1,3 @@
-# Tourism Dataset loader (Athanasopoulos 2011 Tourism forecasting competition).
-# .tsf format identical to M3/M1; reuses _parse_tsf.
 
 import os
 from dataclasses import dataclass

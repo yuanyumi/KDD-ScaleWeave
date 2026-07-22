@@ -8,7 +8,6 @@ import math
 class PositionalEmbedding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         super(PositionalEmbedding, self).__init__()
-        # Compute the positional encodings once in log space.
         pe = torch.zeros(max_len, d_model).float()
         pe.require_grad = False
 
@@ -36,7 +35,6 @@ class TokenEmbedding(nn.Module):
                 nn.init.kaiming_normal_(m.weight, mode='fan_in', nonlinearity='leaky_relu')
 
     def forward(self, x):
-        # print("x.shape = {}".format(x.shape))
         x = self.tokenConv(x.permute(0, 2, 1)).transpose(1, 2)
         return x
 

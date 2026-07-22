@@ -1,5 +1,3 @@
-# Tourism summary utility — SMAPE-only.
-# Mirrors utils/m3_summary.py; no "Other" subset.
 
 import os
 from collections import OrderedDict
@@ -52,13 +50,10 @@ class TourismSummary:
         return round_all(grouped_smapes), round_all(grouped_mapes)
 
     def summarize_groups(self, scores):
-        """DeformableTST (NeurIPS 2024) Tourism protocol:
-        unweighted arith mean over Quarterly + Monthly ONLY (Yearly skipped — see paper
-        Appendix p.17: 'Considering the dataset size, we only use Tourism Quarterly and
-        Tourism Monthly'). Verified: paper Table 13 (Q=17.968, M=25.037) → 21.503 ≈ Table 3 21.502.
-        Yearly is still reported per-subset but excluded from the headline Average."""
+        """Unweighted arithmetic mean over Quarterly and Monthly only; Yearly is
+        reported per-subset but excluded from the headline average."""
         scores_summary = OrderedDict()
-        paper_subsets = ['Quarterly', 'Monthly']  # paper协议 — Yearly excluded
+        paper_subsets = ['Quarterly', 'Monthly']
         paper_vals = []
         for g in TourismMeta.seasonal_patterns:
             if g not in scores:

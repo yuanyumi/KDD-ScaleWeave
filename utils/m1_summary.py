@@ -1,5 +1,3 @@
-# M1 summary utility — SMAPE-only.
-# Mirrors utils/m3_summary.py; no "Other" subset.
 
 import os
 from collections import OrderedDict
@@ -52,7 +50,7 @@ class M1Summary:
         return round_all(grouped_smapes), round_all(grouped_mapes)
 
     def summarize_groups(self, scores):
-        """Unweighted arithmetic mean of subsets — matches DeformableTST protocol."""
+        """Unweighted arithmetic mean over subsets."""
         scores_summary = OrderedDict()
         vals = []
         for g in M1Meta.seasonal_patterns:

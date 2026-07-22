@@ -1,6 +1,3 @@
-# M1 Dataset loader for short-term forecasting (Makridakis 1982 M-competition).
-# .tsf format identical to M3; reuses the shared _parse_tsf parser.
-# Difference vs M3: no "Other" subset — only Yearly/Quarterly/Monthly.
 
 import os
 from dataclasses import dataclass

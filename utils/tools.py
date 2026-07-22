@@ -122,17 +122,16 @@ def convert_tsf_to_dataframe(
 
     with open(full_file_path_and_name, "r", encoding="cp1252") as file:
         for line in file:
-            # Strip white space from start/end of line
             line = line.strip()
 
             if line:
-                if line.startswith("@"):  # Read meta-data
+                if line.startswith("@"):
                     if not line.startswith("@data"):
                         line_content = line.split(" ")
                         if line.startswith("@attribute"):
                             if (
                                 len(line_content) != 3
-                            ):  # Attributes have both name and type
+                            ):
                                 raise Exception("Invalid meta-data specification.")
 
                             col_names.append(line_content[1])
@@ -140,7 +139,7 @@ def convert_tsf_to_dataframe(
                         else:
                             if (
                                 len(line_content) != 2
-                            ):  # Other meta-data have only values
+                            ):
                                 raise Exception("Invalid meta-data specification.")
 
                             if line.startswith("@frequency"):
@@ -220,7 +219,7 @@ def convert_tsf_to_dataframe(
                             else:
                                 raise Exception(
                                     "Invalid attribute type."
-                                )  # Currently, the code supports only numeric, string and date types. Extend this as required.
+                                )
 
                             if att_val is None:
                                 raise Exception("Invalid attribute value.")
@@ -256,9 +255,7 @@ def vali(model, vali_data, vali_loader, criterion, args, device, itr):
         for attr in ['in_layer', 'out_layer', 'enc_embedding', 'output_projection', 'large_layer1', 'large_layer0', 'l2s']:
             if hasattr(model, attr):
                 getattr(model, attr).eval()
-        # Legacy: pre-rename code looked at model.gpt2; the clean ScaleWeave model
-        # uses model.encoder. Probe whichever exists.
-        encoder = getattr(model, 'encoder', None) or getattr(model, 'gpt2', None)
+        encoder = getattr(model, 'encoder', None)
         if encoder is not None:
             for attr in ['gnn_layer', 'gnn_layer_l']:
                 if hasattr(encoder, attr):
@@ -274,7 +271,6 @@ def vali(model, vali_data, vali_loader, criterion, args, device, itr):
 
             outputs = model(batch_x, itr, x_mark=batch_x_mark) if getattr(args, 'use_time_embed', 0) else model(batch_x, itr)
             
-            # encoder - decoder
             outputs = outputs[:, -args.pred_len:, :]
             batch_y = batch_y[:, -args.pred_len:, :].to(device)
 
@@ -291,7 +287,7 @@ def vali(model, vali_data, vali_loader, criterion, args, device, itr):
         for attr in ['in_layer', 'out_layer', 'enc_embedding', 'output_projection', 'large_layer1', 'large_layer0', 'l2s']:
             if hasattr(model, attr):
                 getattr(model, attr).train()
-        encoder = getattr(model, 'encoder', None) or getattr(model, 'gpt2', None)
+        encoder = getattr(model, 'encoder', None)
         if encoder is not None:
             for attr in ['gnn_layer', 'gnn_layer_l']:
                 if hasattr(encoder, attr):
@@ -309,14 +305,12 @@ def cal_metric(preds, trues):
     preds = np.concatenate(preds, axis=0)
     trues = np.concatenate(trues, axis=0)
 
-    # mases = np.mean(np.array(mases))
     print('test shape:', preds.shape, trues.shape)
     preds = preds.reshape(-1, preds.shape[-2], preds.shape[-1])
     trues = trues.reshape(-1, trues.shape[-2], trues.shape[-1])
     print('test shape:', preds.shape, trues.shape)
 
     mae, mse, rmse, mape, mspe, smape, nd = metric(preds, trues)
-    # print('mae:{:.4f}, mse:{:.4f}, rmse:{:.4f}, smape:{:.4f}, mases:{:.4f}'.format(mae, mse, rmse, smape, mases))
     print('mse:{:.8f}, mae:{:.8f} , rmse:{:.8f}, smape:{:.8f}'.format(mse, mae, rmse, smape))
 
     return mae, mse, rmse, mape, mspe, smape, nd
@@ -325,7 +319,6 @@ def cal_metric(preds, trues):
 def test(model, test_data, test_loader, args, device, itr):
     preds = []
     trues = []
-    # mases = []
 
     model.eval()
     with torch.no_grad():
@@ -338,7 +331,6 @@ def test(model, test_data, test_loader, args, device, itr):
             if outputs == None:
                 continue
             
-            # encoder - decoder
             outputs = outputs[:, -args.pred_len:, :]
             batch_y = batch_y[:, -args.pred_len:, :].to(device)
 

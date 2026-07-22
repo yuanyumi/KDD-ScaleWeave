@@ -1,6 +1,3 @@
-# Hospital Dataset (767 monthly patient-count series, Jan 2000 - Dec 2006).
-# Single subset "Monthly", horizon 12 (1 year) per N-BEATS-style convention.
-# Note: the .tsf has no @horizon header — h=12 is the literature standard.
 
 import os
 from dataclasses import dataclass

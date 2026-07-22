@@ -32,7 +32,6 @@ def MSPE(pred, true):
 
 def SMAPE(pred, true):
     return np.mean(200 * np.abs(pred - true) / (np.abs(pred) + np.abs(true) + 1e-8))
-    # return np.mean(200 * np.abs(pred - true) / (pred + true + 1e-8))
 
 def ND(pred, true):
     return np.mean(np.abs(true - pred)) / np.mean(np.abs(true))

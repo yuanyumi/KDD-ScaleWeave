@@ -1,7 +1,3 @@
-# M3 summary utility — SMAPE-only (no Naive2/OWA).
-# Mirrors structure of utils/m4_summary.py but stripped to SMAPE since M3
-# has no canonical Naive2 submission file and DeformableTST Table 3 reports
-# only SMAPE for M3.
 
 import os
 from collections import OrderedDict
@@ -41,7 +37,6 @@ class M3Summary:
                 continue
             model_forecast = pd.read_csv(file_name).values
             target = group_values(self.test_set.values, self.test_set.groups, group_name)
-            # Stack targets into a (N, h) array — all series in a group share h.
             target = np.stack([np.asarray(t, dtype=np.float32) for t in target])
             grouped_smapes[group_name] = float(np.mean(smape_2(forecast=model_forecast, target=target)))
             grouped_mapes[group_name] = float(np.mean(mape(forecast=model_forecast, target=target)))
@@ -55,8 +50,7 @@ class M3Summary:
         return round_all(grouped_smapes), round_all(grouped_mapes)
 
     def summarize_groups(self, scores):
-        """Unweighted arithmetic mean of subsets — matches DeformableTST (NeurIPS 2024) Table 3
-        protocol. Verified by reproducing 6+ baseline rows from Table 13 via (Y+Q+M+O)/4."""
+        """Unweighted arithmetic mean over subsets."""
         scores_summary = OrderedDict()
         vals = []
         for g in M3Meta.seasonal_patterns:

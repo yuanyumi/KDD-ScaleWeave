@@ -1,5 +1,3 @@
-# KDD Cup 2018 Dataset (270 hourly air-quality time series, Beijing+London).
-# Single subset "Hourly", horizon 168 (1 week of hourly forecasts).
 
 import os
 from dataclasses import dataclass
@@ -19,7 +17,7 @@ def _make_1d_object(vals):
 class KDDCupMeta:
     seasonal_patterns = ['Hourly']
     horizons = [168]
-    frequencies = [24]  # daily seasonality on hourly data
+    frequencies = [24]
     horizons_map = {'Hourly': 168}
     frequency_map = {'Hourly': 24}
     history_size = {'Hourly': 1.5}
@@ -46,8 +44,6 @@ class KDDCupDataset:
                 if len(s) <= h:
                     continue
                 arr = s[:-h] if training else s[-h:]
-                # KDD Cup series_name can repeat across (city,station,measurement)
-                # — disambiguate the saved id by appending a row index.
                 all_ids.append(f'{sid}_{len(all_ids)}')
                 all_groups.append(sp)
                 all_freqs.append(freq)

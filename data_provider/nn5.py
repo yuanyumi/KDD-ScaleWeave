@@ -1,5 +1,3 @@
-# NN5 Daily Dataset (banking ATM withdrawals, 111 daily series).
-# Single subset "Daily", horizon 56 (8 weeks).
 
 import os
 from dataclasses import dataclass
@@ -17,9 +15,6 @@ def _make_1d_object(vals):
 
 @dataclass()
 class NN5Meta:
-    # DeformableTST (NeurIPS 2024) Appendix p.17 protocol: "NN5 contains weekly
-    # time series from the banking domain." → use the Monash weekly-aggregated
-    # version (111 series, h=8), NOT the daily version (h=56).
     seasonal_patterns = ['Weekly']
     horizons = [8]
     frequencies = [1]

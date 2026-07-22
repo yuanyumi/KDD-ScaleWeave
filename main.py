@@ -219,13 +219,11 @@ for ii in range(args.itr):
     train_data, train_loader = data_provider(args, 'train', train_shuffle=args.train_shuffle)
     vali_data, vali_loader = data_provider(args, 'val')
     if is_zero_shot:
-        # For zero-shot, switch to test dataset
         args.root_path = args.test_root_path
         args.data_path = args.test_data_path
         args.data = args.test_data
         test_data, test_loader = data_provider(args, 'test')
 
-        # Handle frequency for zero-shot
         if args.freq != 'h':
             args.freq = SEASONALITY_MAP[test_data.freq]
             print("freq = {}".format(args.freq))

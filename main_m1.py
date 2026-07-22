@@ -1,9 +1,4 @@
-"""M1 short-term forecasting entry point for ScaleWeave.
-
-Cloned from main_m4.py with M4→M3 substitutions and B2 conservative defaults
-(d_model=64, d_ff=128, n_heads=8, e_layers=3) since M1 has only 1001 series.
-SMAPE-only evaluation; no Naive2/OWA.
-"""
+"""M1 short-term forecasting entry point for ScaleWeave."""
 import sys
 sys.path.append('.')
 
@@ -35,7 +30,6 @@ torch.set_num_threads(4)
 
 def build_parser():
     p = argparse.ArgumentParser(description='ScaleWeave M1 short-term forecasting')
-    # data
     p.add_argument('--root_path', type=str, default='./datasets/m1/')
     p.add_argument('--data', type=str, default='m1')
     p.add_argument('--seasonal_patterns', type=str, required=True,
@@ -46,11 +40,9 @@ def build_parser():
     p.add_argument('--embed', type=str, default='timeF')
     p.add_argument('--percent', type=int, default=100)
     p.add_argument('--max_len', type=int, default=-1)
-    # horizons auto-set from M3Meta; seq_len = 2 * pred_len
     p.add_argument('--seq_len', type=int, default=0)
     p.add_argument('--label_len', type=int, default=0)
     p.add_argument('--pred_len', type=int, default=0)
-    # training
     p.add_argument('--loss', type=str, default='SMAPE',
                    choices=['SMAPE', 'MAPE', 'MASE', 'MSE'])
     p.add_argument('--learning_rate', type=float, default=1e-3)
@@ -63,7 +55,6 @@ def build_parser():
     p.add_argument('--eta_min', type=float, default=1e-8)
     p.add_argument('--pct_start', type=float, default=0.2)
     p.add_argument('--seed', type=int, default=42)
-    # model knobs — B2 conservative capacity for the smaller M3 corpus.
     p.add_argument('--model', type=str, default='ScaleWeave')
     p.add_argument('--d_model', type=int, default=64)
     p.add_argument('--d_ff', type=int, default=128)
@@ -77,23 +68,19 @@ def build_parser():
     p.add_argument('--multi', type=int, default=0)
     p.add_argument('--revin_flag', type=int, default=1)
     p.add_argument('--transformer_ff_inner', type=int, default=128)
-    # patching
     p.add_argument('--scale_patch_sizes', type=str, default='2 4 6')
     p.add_argument('--scale_strides', type=str, default='2 4 6')
     p.add_argument('--hsg_layers', type=int, default=2)
     p.add_argument('--cross_scale_g', type=int, default=1)
     p.add_argument('--g_gate', type=int, default=1)
     p.add_argument('--learned_hyperedge_weights', type=int, default=0)
-    # infra
     p.add_argument('--sch_inject_at', type=str, default='0')
     p.add_argument('--gate_init_prg', type=float, default=0.5)
-    # misc
     p.add_argument('--fname', type=str, default='./checkpoints/m1')
     p.add_argument('--wd_project', type=str, default='m1')
     p.add_argument('--run_name', type=str, default='hsg_m1')
     p.add_argument('--itr', type=int, default=1)
     p.add_argument('--exp_tag', type=str, default='', help='if set, output dir becomes ScaleWeave_<exp_tag>, keeps sweeps separate')
-    # DeformableTST-style optim knobs (论文 short-term.sh defaults: AdamW + wd=0.05 + warmup=5)
     p.add_argument('--optimizer', type=str, default='Adam', choices=['Adam', 'AdamW'])
     p.add_argument('--weight_decay', type=float, default=0.0)
     p.add_argument('--warmup_epochs', type=int, default=0)
@@ -141,7 +128,7 @@ def vali(model, train_loader, vali_loader, criterion, args, device):
     """Validation: full-dataset forecast from last insample window, then loss."""
     x, _ = train_loader.dataset.last_insample_window()
     y = vali_loader.dataset.timeseries
-    x = torch.tensor(x, dtype=torch.float32, device=device).unsqueeze(-1)  # (B, seq_len, 1)
+    x = torch.tensor(x, dtype=torch.float32, device=device).unsqueeze(-1)
 
     model.eval()
     with torch.no_grad():
@@ -174,14 +161,13 @@ def run_test(model, train_loader, test_loader, args, device, out_dir):
             chunk = x[id_list[i]:id_list[i + 1]]
             outputs[id_list[i]:id_list[i + 1]] = model(chunk, 0).detach().cpu()[:, -args.pred_len:, :]
 
-    preds = outputs.numpy()[:, :, 0]  # (B, pred_len)
+    preds = outputs.numpy()[:, :, 0]
     trues = np.array(y, dtype=object)
 
     os.makedirs(out_dir, exist_ok=True)
     df = pd.DataFrame(preds, columns=[f'V{i + 1}' for i in range(args.pred_len)])
     df.index = ids[:preds.shape[0]]
     df.index.name = 'id'
-    # match reference: drop first column after set_index collapse trick
     df.set_index(df.columns[0], inplace=True)
     out_csv = os.path.join(out_dir, args.seasonal_patterns + '_forecast.csv')
     df.to_csv(out_csv)
@@ -237,7 +223,6 @@ def main():
     mse = nn.MSELoss()
     early_stopping = EarlyStopping(patience=args.patience, verbose=True)
 
-    # Build base scheduler, then optionally prepend LinearLR warmup via SequentialLR.
     if args.lradj == 'COS':
         base_sched = torch.optim.lr_scheduler.CosineAnnealingLR(
             model_optim, T_max=args.tmax, eta_min=args.eta_min
@@ -266,11 +251,11 @@ def main():
         losses = []
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
             model_optim.zero_grad()
-            batch_x = batch_x.float().to(device)         # (B, seq_len, 1)
-            batch_y = batch_y.float().to(device)         # (B, label+pred, 1)
+            batch_x = batch_x.float().to(device)
+            batch_y = batch_y.float().to(device)
             batch_y_mark = batch_y_mark.float().to(device)
 
-            outputs = model(batch_x, 0)                   # (B, pred_len, 1)
+            outputs = model(batch_x, 0)
             outputs = outputs[:, -args.pred_len:, :]
             target = batch_y[:, -args.pred_len:, :]
             target_mask = batch_y_mark[:, -args.pred_len:, :]
@@ -309,7 +294,6 @@ def main():
                            args.model + (f'_{args.exp_tag}' if args.exp_tag else ''))
     _, preds, trues = run_test(model, train_loader, test_loader, args, device, out_dir)
 
-    # Inline per-subset SMAPE — doesn't require all subsets to be present.
     trues_arr = np.stack([np.asarray(t, dtype=np.float32) for t in trues])
     denom = np.abs(preds) + np.abs(trues_arr)
     denom = np.where(denom == 0.0, 1.0, denom)

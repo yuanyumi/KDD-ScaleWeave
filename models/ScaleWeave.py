@@ -43,7 +43,6 @@ class SCHLayer(nn.Module):
             )
             if self.use_g_gate:
                 self.g_gate_proj = nn.Linear(2 * d_model, d_model)
-                # Init the gate closed: cross-scale info mixes in gradually.
                 nn.init.zeros_(self.g_gate_proj.weight)
                 nn.init.constant_(self.g_gate_proj.bias, -2.0)
 
@@ -76,26 +75,22 @@ class SCHLayer(nn.Module):
     ) -> Tuple[List[torch.Tensor], torch.Tensor, torch.Tensor]:
         B, M, S, _ = V.shape
 
-        # Stage 1: hyperedge representations.
         P_means = torch.stack([P.mean(dim=2) for P in P_list], dim=2)
         E1 = self.edge_e1(0.5 * P_means + 0.5 * V)
         E2 = self.edge_e2(0.5 * V.mean(dim=1) + 0.5 * G)
         E3 = self.edge_e3(V.mean(dim=2))
 
-        # Stage 2a: patch nodes pull from their (variable, scale) hyperedge.
         new_P_list = []
         for s_idx, P in enumerate(P_list):
             E1_s = E1[:, :, s_idx:s_idx + 1, :].expand(-1, -1, P.size(2), -1)
             update = self.update_p(torch.cat([P, E1_s], dim=-1))
             new_P_list.append(self.ln_p(P + self.dropout(update)))
 
-        # Stage 2b: variable-scale nodes pull from all three hyperedges.
         E2_exp = E2.unsqueeze(1).expand(-1, M, -1, -1)
         E3_exp = E3.unsqueeze(2).expand(-1, -1, S, -1)
         v_update = self.update_v(torch.cat([V, E1, E2_exp, E3_exp], dim=-1))
         new_V = self.ln_v(V + self.dropout(v_update))
 
-        # Stage 2c: scale nodes, optional cross-scale fusion with a gate.
         if self.use_cross_scale_g:
             S_ = G.size(1)
             G_bar = (G.sum(dim=1, keepdim=True) - G) / max(S_ - 1, 1)
@@ -173,7 +168,6 @@ class ScaleCoupledHypergraph(nn.Module):
         x = tokens.view(B, M, N_total, self.d_model)
         P_list = list(torch.split(x, list(patch_nums), dim=2))
 
-        # Build variable-scale node V from each scale's patch sequence.
         if self.use_learned_v_pool:
             V_list = []
             for s_idx, P in enumerate(P_list):
@@ -186,14 +180,12 @@ class ScaleCoupledHypergraph(nn.Module):
             V = torch.stack([P.mean(dim=2) for P in P_list], dim=2)
         V = V + self.v_scale_bias.view(1, 1, self.num_scales, self.d_model) + self.v_init
 
-        # Scale node G: cross-variable mean of V plus learnable scale bias.
         G = V.mean(dim=1)
         G = G + self.g_scale_bias.view(1, self.num_scales, self.d_model) + self.g_init
 
         for layer in self.layers:
             P_list, V, G = layer(P_list, V, G)
 
-        # Residual gate: blend updated patch tokens back with the input.
         updated = torch.cat(P_list, dim=2).view(B * M, N_total, self.d_model)
         gate = torch.sigmoid(self.gate)
         return self.ln(gate * updated + (1.0 - gate) * tokens)
@@ -244,7 +236,6 @@ class ScaleWeaveEncoder(nn.Module):
             use_learned_v_pool=bool(getattr(args, 'learned_hyperedge_weights', 0)),
         )
 
-        # Per-batch info set by the outer model before each forward.
         self.batch_size: int = 0
         self.num_vars: int = 0
         self.patch_nums: Sequence[int] = ()
@@ -304,7 +295,6 @@ class ScaleWeave(nn.Module):
         super().__init__()
         self.device = device
 
-        # Multi-scale patching.
         self.scale_patch_sizes = [int(x) for x in configs.scale_patch_sizes.split()]
         self.scale_strides = [int(x) for x in configs.scale_strides.split()]
         assert len(self.scale_patch_sizes) == len(self.scale_strides), \
@@ -313,7 +303,6 @@ class ScaleWeave(nn.Module):
         configs.num_scales = self.num_scales
         configs.hsg_layers = getattr(configs, 'hsg_layers', 2)
 
-        # +1 patch from the trailing ReplicationPad on each scale.
         self.patch_nums = [
             (configs.seq_len - p) // s + 2
             for p, s in zip(self.scale_patch_sizes, self.scale_strides)
@@ -324,7 +313,6 @@ class ScaleWeave(nn.Module):
             nn.ReplicationPad1d((0, s)) for s in self.scale_strides
         ])
 
-        # Backbone, embeddings, head.
         self.encoder = ScaleWeaveEncoder(configs)
 
         self.scale_embeddings = nn.ModuleList([
@@ -375,7 +363,7 @@ class ScaleWeave(nn.Module):
         M: int,
     ) -> List[torch.Tensor]:
         """Project per-patch time marks to ``d_model`` and broadcast to (B*M, N_s, d)."""
-        xm = x_mark.permute(0, 2, 1).contiguous()  # (B, D_time, L)
+        xm = x_mark.permute(0, 2, 1).contiguous()
         outs: List[torch.Tensor] = []
         for s_idx in range(self.num_scales):
             xm_s = self.padding_layers[s_idx](xm)
@@ -383,9 +371,9 @@ class ScaleWeave(nn.Module):
                 dimension=-1,
                 size=self.scale_patch_sizes[s_idx],
                 step=self.scale_strides[s_idx],
-            ).mean(dim=-1)                                  # (B, D_time, N_s)
-            xm_s = xm_s.permute(0, 2, 1)                     # (B, N_s, D_time)
-            t = self.time_projs[s_idx](xm_s)                 # (B, N_s, d)
+            ).mean(dim=-1)
+            xm_s = xm_s.permute(0, 2, 1)
+            t = self.time_projs[s_idx](xm_s)
             t = t.unsqueeze(1).expand(-1, M, -1, -1).reshape(B * M, t.size(1), -1)
             outs.append(t)
         return outs
@@ -393,7 +381,6 @@ class ScaleWeave(nn.Module):
     def forward(self, x: torch.Tensor, ii=None, x_mark: torch.Tensor = None) -> torch.Tensor:
         B, _, M = x.shape
 
-        # Normalise.
         if self.revin_flag == 1:
             x = self.revin_layer(x, 'norm')
             means = stdev = None
@@ -405,7 +392,7 @@ class ScaleWeave(nn.Module):
             ).detach()
             x = x / stdev
 
-        x = x.permute(0, 2, 1).contiguous()  # (B, M, L)
+        x = x.permute(0, 2, 1).contiguous()
 
         per_scale_time_emb = (
             self._per_scale_time_embeddings(x_mark, B, M)
@@ -413,7 +400,6 @@ class ScaleWeave(nn.Module):
             else None
         )
 
-        # Multi-scale patching + embedding.
         all_tokens = []
         for s_idx in range(self.num_scales):
             x_s = self.padding_layers[s_idx](x)
@@ -429,17 +415,14 @@ class ScaleWeave(nn.Module):
             all_tokens.append(x_s)
         enc_in = torch.cat(all_tokens, dim=1)
 
-        # Transformer + SCH.
         self.encoder.set_batch_info(B, M, self.patch_nums)
         enc_out = self.encoder(enc_in).last_hidden_state
 
-        # Head.
         enc_out = enc_out[:, :, :self.d_ff]
         enc_out = enc_out.view(-1, M, enc_out.size(-2), enc_out.size(-1))
-        enc_out = enc_out.permute(0, 1, 3, 2).contiguous()  # (B, M, d, N)
+        enc_out = enc_out.permute(0, 1, 3, 2).contiguous()
         outputs = self.output_projection(enc_out).permute(0, 2, 1).contiguous()
 
-        # De-normalise.
         if self.revin_flag == 1:
             outputs = self.revin_layer(outputs, 'denorm')
         else:

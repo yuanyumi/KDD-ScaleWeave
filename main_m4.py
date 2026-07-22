@@ -1,10 +1,4 @@
-"""M4 short-term forecasting entry point for ScaleWeave.
-
-Kept separate from main.py so long-running multivariate experiments are not
-disturbed. Mirrors the training loop of
-Short-term_Forecasting/exp/exp_short_term_forecasting.py but uses ScaleWeave's
-forward(x, ii) signature.
-"""
+"""M4 short-term forecasting entry point for ScaleWeave."""
 import sys
 sys.path.append('.')
 
@@ -36,7 +30,6 @@ torch.set_num_threads(4)
 
 def build_parser():
     p = argparse.ArgumentParser(description='ScaleWeave M4 short-term forecasting')
-    # data
     p.add_argument('--root_path', type=str, default='./datasets/m4/')
     p.add_argument('--data', type=str, default='m4')
     p.add_argument('--seasonal_patterns', type=str, required=True,
@@ -47,11 +40,9 @@ def build_parser():
     p.add_argument('--embed', type=str, default='timeF')
     p.add_argument('--percent', type=int, default=100)
     p.add_argument('--max_len', type=int, default=-1)
-    # horizons auto-set from M4Meta; seq_len = 2 * pred_len
     p.add_argument('--seq_len', type=int, default=0)
     p.add_argument('--label_len', type=int, default=0)
     p.add_argument('--pred_len', type=int, default=0)
-    # training
     p.add_argument('--loss', type=str, default='SMAPE',
                    choices=['SMAPE', 'MAPE', 'MASE', 'MSE'])
     p.add_argument('--learning_rate', type=float, default=1e-3)
@@ -64,7 +55,6 @@ def build_parser():
     p.add_argument('--eta_min', type=float, default=1e-8)
     p.add_argument('--pct_start', type=float, default=0.2)
     p.add_argument('--seed', type=int, default=42)
-    # model knobs — mirror main.py defaults where applicable
     p.add_argument('--model', type=str, default='ScaleWeave')
     p.add_argument('--d_model', type=int, default=128)
     p.add_argument('--d_ff', type=int, default=256)
@@ -78,17 +68,14 @@ def build_parser():
     p.add_argument('--multi', type=int, default=0)
     p.add_argument('--revin_flag', type=int, default=0)
     p.add_argument('--transformer_ff_inner', type=int, default=256)
-    # patching
     p.add_argument('--scale_patch_sizes', type=str, default='2 4 6')
     p.add_argument('--scale_strides', type=str, default='2 4 6')
     p.add_argument('--hsg_layers', type=int, default=2)
     p.add_argument('--cross_scale_g', type=int, default=1)
     p.add_argument('--g_gate', type=int, default=1)
     p.add_argument('--learned_hyperedge_weights', type=int, default=0)
-    # infra
     p.add_argument('--sch_inject_at', type=str, default='0')
     p.add_argument('--gate_init_prg', type=float, default=0.5)
-    # misc
     p.add_argument('--fname', type=str, default='./checkpoints/m4')
     p.add_argument('--wd_project', type=str, default='m4')
     p.add_argument('--run_name', type=str, default='hsg_m4')
@@ -137,7 +124,7 @@ def vali(model, train_loader, vali_loader, criterion, args, device):
     """Validation: full-dataset forecast from last insample window, then loss."""
     x, _ = train_loader.dataset.last_insample_window()
     y = vali_loader.dataset.timeseries
-    x = torch.tensor(x, dtype=torch.float32, device=device).unsqueeze(-1)  # (B, seq_len, 1)
+    x = torch.tensor(x, dtype=torch.float32, device=device).unsqueeze(-1)
 
     model.eval()
     with torch.no_grad():
@@ -170,18 +157,16 @@ def run_test(model, train_loader, test_loader, args, device, out_dir):
             chunk = x[id_list[i]:id_list[i + 1]]
             outputs[id_list[i]:id_list[i + 1]] = model(chunk, 0).detach().cpu()[:, -args.pred_len:, :]
 
-    preds = outputs.numpy()[:, :, 0]  # (B, pred_len)
+    preds = outputs.numpy()[:, :, 0]
     trues = np.array(y, dtype=object)
 
     os.makedirs(out_dir, exist_ok=True)
     df = pd.DataFrame(preds, columns=[f'V{i + 1}' for i in range(args.pred_len)])
     df.index = ids[:preds.shape[0]]
     df.index.name = 'id'
-    # match reference: drop first column after set_index collapse trick
     df.set_index(df.columns[0], inplace=True)
     out_csv = os.path.join(out_dir, args.seasonal_patterns + '_forecast.csv')
     df.to_csv(out_csv)
-    # clean arrays for the M4 showcase figure (aligned by id)
     try:
         sp = args.seasonal_patterns
         np.save(os.path.join(out_dir, sp + '_pred.npy'), preds.astype('float32'))
@@ -257,17 +242,16 @@ def main():
         losses = []
         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(train_loader)):
             model_optim.zero_grad()
-            batch_x = batch_x.float().to(device)         # (B, seq_len, 1)
-            batch_y = batch_y.float().to(device)         # (B, label+pred, 1)
+            batch_x = batch_x.float().to(device)
+            batch_y = batch_y.float().to(device)
             batch_y_mark = batch_y_mark.float().to(device)
 
-            outputs = model(batch_x, 0)                   # (B, pred_len, 1)
+            outputs = model(batch_x, 0)
             outputs = outputs[:, -args.pred_len:, :]
             target = batch_y[:, -args.pred_len:, :]
             target_mask = batch_y_mark[:, -args.pred_len:, :]
 
             if args.loss in ('SMAPE', 'MAPE', 'MASE'):
-                # loss ops expect 2D (B, T); feed insample as (B, seq_len)
                 insample = batch_x[:, :, 0]
                 loss = criterion(insample, args.frequency_map,
                                  outputs[:, :, 0], target[:, :, 0], target_mask[:, :, 0])

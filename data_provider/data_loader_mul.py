@@ -17,8 +17,6 @@ class Dataset_ETT_hour(Dataset):
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h',
                  max_len=-1, train_all=False):
-        # size [seq_len, label_len, pred_len]
-        # info
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -27,7 +25,6 @@ class Dataset_ETT_hour(Dataset):
             self.seq_len = size[0]
             self.label_len = size[1]
             self.pred_len = size[2]
-        # init
         assert flag in ['train', 'test', 'val']
         type_map = {'train': 0, 'val': 1, 'test': 2}
         self.set_type = type_map[flag]
@@ -45,7 +42,6 @@ class Dataset_ETT_hour(Dataset):
         self.enc_in = self.data_x.shape[-1]
         print("self.enc_in = {}".format(self.enc_in))
         print("self.data_x = {}".format(self.data_x.shape))
-        # self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
 
 
     def __read_data__(self):
@@ -111,8 +107,6 @@ class Dataset_ETT_minute(Dataset):
                  features='S', data_path='ETTm1.csv',
                  target='OT', scale=True, timeenc=0, freq='t',
                  max_len=-1, train_all=False):
-        # size [seq_len, label_len, pred_len]
-        # info
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -121,7 +115,6 @@ class Dataset_ETT_minute(Dataset):
             self.seq_len = size[0]
             self.label_len = size[1]
             self.pred_len = size[2]
-        # init
         assert flag in ['train', 'test', 'val']
         type_map = {'train': 0, 'val': 1, 'test': 2}
         self.set_type = type_map[flag]
@@ -204,8 +197,6 @@ class Dataset_Custom(Dataset):
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h',
                  max_len=-1, train_all=False):
-        # size [seq_len, label_len, pred_len]
-        # info
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -214,7 +205,6 @@ class Dataset_Custom(Dataset):
             self.seq_len = size[0]
             self.label_len = size[1]
             self.pred_len = size[2]
-        # init
         assert flag in ['train', 'test', 'val']
         type_map = {'train': 0, 'val': 1, 'test': 2}
         self.set_type = type_map[flag]
@@ -230,7 +220,6 @@ class Dataset_Custom(Dataset):
         self.__read_data__()
 
         self.enc_in = self.data_x.shape[-1]
-        # self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
 
     def __read_data__(self):
         self.scaler = StandardScaler()
@@ -244,7 +233,6 @@ class Dataset_Custom(Dataset):
         cols.remove(self.target)
         cols.remove('date')
         df_raw = df_raw[['date'] + cols + [self.target]]
-        # print(cols)
         num_train = int(len(df_raw) * 0.7)
         num_test = int(len(df_raw) * 0.2)
         num_vali = len(df_raw) - num_train - num_test
@@ -307,8 +295,6 @@ class Dataset_Pred(Dataset):
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, inverse=False, timeenc=0, freq='15min', cols=None,
                  percent=None, train_all=False):
-        # size [seq_len, label_len, pred_len]
-        # info
         if size == None:
             self.seq_len = 24 * 4 * 4
             self.label_len = 24 * 4
@@ -317,7 +303,6 @@ class Dataset_Pred(Dataset):
             self.seq_len = size[0]
             self.label_len = size[1]
             self.pred_len = size[2]
-        # init
         assert flag in ['pred']
 
         self.features = features
@@ -455,7 +440,6 @@ class Dataset_TSF(Dataset):
             else:
                 border1s = [0,                          train_len - self.seq_len - self.pred_len, train_len-self.seq_len]
                 border2s = [train_len - self.pred_len,  train_len,                                _len]
-            # print("_len = {}".format(_len))
             
             curr_len = border2s[self.set_type] - max(border1s[self.set_type], 0) - self.pred_len - self.seq_len + 1
             curr_len = max(0, curr_len)
@@ -494,14 +478,11 @@ class Dataset_TSF(Dataset):
         data_y = self.timeseries[seq_id][r_begin:r_end]
         data_x = np.expand_dims(data_x, axis=-1)
         data_y = np.expand_dims(data_y, axis=-1)
-        # if self.set_type == 2:
-        #     print("data_x.shape = {}, data_y.shape = {}".format(data_x.shape, data_y.shape))
 
         return data_x, data_y, data_x, data_y
 
     def __len__(self):
         if self.set_type == 0:
-            # return self.tot_len
             return min(self.max_len, self.tot_len)
         else:
             return self.tot_len

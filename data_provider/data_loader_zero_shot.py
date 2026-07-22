@@ -5,7 +5,7 @@
   and concatenates train+horizon per series (no extra download needed).
 
 Both branches yield the same `list[np.ndarray]` shape, then share one
-sliding-window scheme aligned with the GPT4TS / SE-LLM zero-shot protocol:
+sliding-window scheme:
   - train split: windows from start to (full_len - seq_len - 2*pred_len + 1)
   - val   split: window ending at  (full_len - pred_len)
   - test  split: window ending at   full_len  (last `pred_len` is GT)
@@ -86,7 +86,6 @@ class Dataset_MSeries(Dataset):
         self.timeseries, self.len_seq, self.seq_id, self.tot_len = \
             self._build_index(ts_list)
 
-    # M4 short_term eval helper (mirrors Dataset_M4 API used by run_test in main_m4)
     @property
     def ids(self):
         return np.arange(len(self.timeseries))
@@ -125,8 +124,6 @@ class Dataset_MSeries(Dataset):
                 tot)
 
     def __len__(self):
-        # On test we still want one window per series to mirror GPT4TS reporting.
-        # But Dataset_TSF gives only series with valid windows; matches its behavior.
         return self.tot_len
 
     def __getitem__(self, index):
@@ -149,8 +146,8 @@ class Dataset_MSeries(Dataset):
         r_begin = s_end
         r_end = r_begin + self.pred_len
 
-        x = ts[s_begin:s_end][:, None]                # (seq_len, 1)
-        y = ts[r_begin:r_end][:, None]                # (pred_len, 1)
+        x = ts[s_begin:s_end][:, None]
+        y = ts[r_begin:r_end][:, None]
         return x.astype(np.float32), y.astype(np.float32), x, y
 
     def last_insample_window(self):
