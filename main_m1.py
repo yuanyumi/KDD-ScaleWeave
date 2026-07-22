@@ -1,7 +1,7 @@
 """M1 short-term forecasting entry point for ScaleWeave.
 
 Cloned from main_m4.py with M4→M3 substitutions and B2 conservative defaults
-(d_model=64, d_ff=128, n_heads=8, e_layers=2) since M1 has only 1001 series.
+(d_model=64, d_ff=128, n_heads=8, e_layers=3) since M1 has only 1001 series.
 SMAPE-only evaluation; no Naive2/OWA.
 """
 import sys
@@ -68,7 +68,7 @@ def build_parser():
     p.add_argument('--d_model', type=int, default=64)
     p.add_argument('--d_ff', type=int, default=128)
     p.add_argument('--n_heads', type=int, default=8)
-    p.add_argument('--e_layers', type=int, default=2)
+    p.add_argument('--e_layers', type=int, default=3)
     p.add_argument('--dropout', type=float, default=0.1)
     p.add_argument('--in_dropout', type=float, default=0.1)
     p.add_argument('--out_dropout', type=float, default=0.1)
@@ -85,10 +85,8 @@ def build_parser():
     p.add_argument('--g_gate', type=int, default=1)
     p.add_argument('--learned_hyperedge_weights', type=int, default=0)
     # infra
-    p.add_argument('--layer_index', type=str, default='3*0*')
+    p.add_argument('--sch_inject_at', type=str, default='0')
     p.add_argument('--gate_init_prg', type=float, default=0.5)
-    p.add_argument('--w_l2s_flag', type=int, default=0)
-    p.add_argument('--w_l2s_v', type=float, default=1e-4)
     # misc
     p.add_argument('--fname', type=str, default='./checkpoints/m1')
     p.add_argument('--wd_project', type=str, default='m1')
@@ -99,9 +97,6 @@ def build_parser():
     p.add_argument('--optimizer', type=str, default='Adam', choices=['Adam', 'AdamW'])
     p.add_argument('--weight_decay', type=float, default=0.0)
     p.add_argument('--warmup_epochs', type=int, default=0)
-    # unused in M3 but referenced by ScaleWeave __init__
-    p.add_argument('--split_len', type=int, default=2)
-    p.add_argument('--cos', type=int, default=0)
     return p
 
 
@@ -116,13 +111,7 @@ def setup_args(args):
     args.data_name = 'm1_' + args.seasonal_patterns
     args.train_shuffle = True
     args.train_shuffle_int = 1
-    # layer_index parsing (mirrors main.py)
-    parts = args.layer_index.split('*')
-    args.gpt_layers = int(parts[0]) if parts[0] else None
-    args.gnn_layer_index = [int(x) for x in parts[1].split('_')] if len(parts) > 1 and parts[1] else []
-    args.gnn_layer_index_str = '_'.join(str(x) for x in args.gnn_layer_index)
-    args.l_gnn_layer_index = [int(x) for x in parts[2].split('_')] if len(parts) > 2 and parts[2] else []
-    args.l_gnn_layer_index_str = '_'.join(str(x) for x in args.l_gnn_layer_index)
+    args.sch_inject_at = [int(x) for x in args.sch_inject_at.split('_')] if args.sch_inject_at else []
     if args.freq == 0:
         args.freq = 'h'
     if not args.multi:

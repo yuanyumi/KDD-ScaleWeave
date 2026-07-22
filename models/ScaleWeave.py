@@ -208,16 +208,16 @@ class _EncoderOutput:
 
 class ScaleWeaveEncoder(nn.Module):
     """Randomly-initialised Transformer encoder (PatchTST-size) that invokes
-    the SCH module at the layer indices in ``args.gnn_layer_index``."""
+    the SCH module at the layer indices in ``args.sch_inject_at``."""
 
     def __init__(self, args):
         super().__init__()
         self.d_model = args.d_model
-        self.n_layer = args.gpt_layers
-        self.gnn_layer_index = args.gnn_layer_index
+        self.n_layer = args.e_layers
+        self.sch_inject_at = args.sch_inject_at
 
         ff_inner = getattr(args, 'transformer_ff_inner', None) or (args.d_model * 4)
-        self.h = nn.ModuleList([
+        self.blocks = nn.ModuleList([
             nn.TransformerEncoderLayer(
                 d_model=args.d_model,
                 nhead=args.n_heads,
@@ -229,7 +229,7 @@ class ScaleWeaveEncoder(nn.Module):
             )
             for _ in range(self.n_layer)
         ])
-        self.wpe = nn.Embedding(1024, args.d_model)
+        self.pos_embed = nn.Embedding(1024, args.d_model)
         self.ln_f = nn.LayerNorm(args.d_model)
         self.drop = nn.Dropout(args.dropout)
 
@@ -268,14 +268,14 @@ class ScaleWeaveEncoder(nn.Module):
     def forward(self, inputs_embeds: torch.Tensor, **_kwargs) -> _EncoderOutput:
         full_batch, seq_len, _ = inputs_embeds.shape
         pos = torch.arange(seq_len, device=inputs_embeds.device).unsqueeze(0)
-        x = self.drop(inputs_embeds + self.wpe(pos))
+        x = self.drop(inputs_embeds + self.pos_embed(pos))
 
-        for i, blk in enumerate(self.h):
-            if i in self.gnn_layer_index:
+        for i, blk in enumerate(self.blocks):
+            if i in self.sch_inject_at:
                 x = self._apply_sch(x, full_batch)
             x = blk(x)
 
-        if self.n_layer in self.gnn_layer_index:
+        if self.n_layer in self.sch_inject_at:
             x = self._apply_sch(x, full_batch)
 
         return _EncoderOutput(self.ln_f(x))

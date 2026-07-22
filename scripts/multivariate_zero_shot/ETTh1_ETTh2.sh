@@ -11,7 +11,6 @@ python main.py \
     --freq=0 \
     --in_dropout=0 \
     --itr=1 \
-    --layer_index=3*0* \
     --learning_rate=0.0003 \
     --lradj=COS \
     --model=ScaleWeave \
@@ -46,7 +45,6 @@ python main.py \
     --freq=0 \
     --in_dropout=0 \
     --itr=1 \
-    --layer_index=3*0* \
     --learning_rate=0.0003 \
     --lradj=COS \
     --model=ScaleWeave \
@@ -81,7 +79,6 @@ python main.py \
     --freq=0 \
     --in_dropout=0 \
     --itr=1 \
-    --layer_index=3*0* \
     --learning_rate=0.0003 \
     --lradj=COS \
     --model=ScaleWeave \
@@ -116,7 +113,6 @@ python main.py \
     --freq=0 \
     --in_dropout=0 \
     --itr=1 \
-    --layer_index=3*0* \
     --learning_rate=0.0003 \
     --lradj=COS \
     --model=ScaleWeave \

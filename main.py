@@ -90,7 +90,6 @@ parser.add_argument('--model', type=str, default='ScaleWeave')
 parser.add_argument('--max_len', type=int, default=-1)
 parser.add_argument('--tmax', type=int, default=20)
 parser.add_argument('--itr', type=int, default=1)
-parser.add_argument('--cos', type=int, default=0)
 parser.add_argument('--fname', default='./checkpoints/', type=str, help='specify checkpoint run name')
 parser.add_argument('--run_name', default='test', type=str)
 parser.add_argument('--wd_project', default='llm_test', type=str)
@@ -99,15 +98,11 @@ parser.add_argument('--seed', type=int, default=42)
 parser.add_argument('--sweep_flag', type=int, default=0) 
 parser.add_argument('--in_dropout', type=float, default=0)
 parser.add_argument('--out_dropout', type=float, default=0.1)
-parser.add_argument('--split_len', type=int, default=2)
-parser.add_argument('--layer_index', type=str, default="6*0_2_4*", help='A space-separated string of integers')
+parser.add_argument('--sch_inject_at', type=str, default='0', help='underscore-separated encoder layer indices where SCH is injected')
 parser.add_argument('--eta_min', type=float, default=1e-8)
 parser.add_argument('--revin_flag', type=int, default=0)
-parser.add_argument('--test', type=int, default=0)
 parser.add_argument('--multi', type=int, default=1)
 parser.add_argument('--train_shuffle_int', type=int, default=0)
-parser.add_argument('--w_l2s_flag', type=int, default=0)
-parser.add_argument('--w_l2s_v', type=float, default=0.0001)
 parser.add_argument('--gate_init_prg', type=float, default=0.5)
 parser.add_argument('--data_flow', type=str, default=None, help='for zero-shot, e.g., ETTh1_ETTh2')
 parser.add_argument('--scale_patch_sizes', type=str, default='8 16 32', help='space-separated patch sizes per scale, e.g., "8 16 32"')
@@ -127,23 +122,8 @@ args.train_shuffle = bool(args.train_shuffle_int)
 if not args.multi:
     args.enc_in = 1
 
-parts = args.layer_index.split('*')
-
-args.gpt_layers = int(parts[0]) if parts[0] else None
-
-if len(parts) > 1 and parts[1]:
-    args.gnn_layer_index = [int(x) for x in parts[1].split('_')]
-    args.gnn_layer_index_str = '_'.join(str(x) for x in args.gnn_layer_index)
-else:
-    args.gnn_layer_index = []
-    args.gnn_layer_index_str = ""
-
-if len(parts) > 2 and parts[2]:
-    args.l_gnn_layer_index = [int(x) for x in parts[2].split('_')]
-    args.l_gnn_layer_index_str = '_'.join(str(x) for x in args.l_gnn_layer_index)
-else:
-    args.l_gnn_layer_index = []
-    args.l_gnn_layer_index_str = ""
+args.sch_inject_at = [int(x) for x in args.sch_inject_at.split('_')] if args.sch_inject_at else []
+args.sch_inject_at_str = '_'.join(str(x) for x in args.sch_inject_at)
 
 
 
@@ -199,30 +179,21 @@ args.train_shuffle_int = 1 if args.train_shuffle else 0
 
 for ii in range(args.itr):
     
-    group_name = '{}_sl{}_df{}_gl{}_{}*{}_spl{}_b{}_l{}_em{}_rf{}_e{}_mul{}_ts{}_wf{}_wv{}_id{}_od{}_s{}{}'.format(
-        args.model, 
+    group_name = '{}_sl{}_df{}_el{}_sch{}_b{}_l{}_em{}_rf{}_e{}_mul{}_ts{}_id{}_od{}_s{}{}'.format(
+        args.model,
         args.seq_len,
         args.d_ff,
-
-        args.gpt_layers,
-        args.gnn_layer_index_str,
-        args.l_gnn_layer_index_str,
-        args.split_len,
+        args.e_layers,
+        args.sch_inject_at_str,
         args.batch_size,
-
         args.learning_rate,
         args.eta_min,
         args.revin_flag,
         args.train_epochs,
         args.multi,
-
         args.train_shuffle_int,
-        args.w_l2s_flag,
-        args.w_l2s_v,
         args.in_dropout,
         args.out_dropout,
-
-
         args.seed,
         args.patience,
         )

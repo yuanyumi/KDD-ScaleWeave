@@ -115,12 +115,8 @@ def build_parser():
     p.add_argument('--g_gate', type=int, default=1)
     p.add_argument('--learned_hyperedge_weights', type=int, default=0)
     # ScaleWeave __init__ requires these even though zero-shot doesn't use them
-    p.add_argument('--layer_index', type=str, default='3*0*')
+    p.add_argument('--sch_inject_at', type=str, default='0')
     p.add_argument('--gate_init_prg', type=float, default=0.5)
-    p.add_argument('--w_l2s_flag', type=int, default=0)
-    p.add_argument('--w_l2s_v', type=float, default=1e-4)
-    p.add_argument('--split_len', type=int, default=2)
-    p.add_argument('--cos', type=int, default=0)
     # output
     p.add_argument('--out_dir', type=str, default='./zero_shot_results/')
     p.add_argument('--tag', type=str, default='run')
@@ -138,12 +134,7 @@ def setup(args):
         args.token_len = args.pred_len
     assert args.token_len <= args.seq_len, \
         f'token_len ({args.token_len}) must be <= seq_len ({args.seq_len}) for rolling slide'
-    parts = args.layer_index.split('*')
-    args.gpt_layers = int(parts[0]) if parts[0] else None
-    args.gnn_layer_index = [int(x) for x in parts[1].split('_')] if len(parts) > 1 and parts[1] else []
-    args.gnn_layer_index_str = '_'.join(str(x) for x in args.gnn_layer_index)
-    args.l_gnn_layer_index = [int(x) for x in parts[2].split('_')] if len(parts) > 2 and parts[2] else []
-    args.l_gnn_layer_index_str = '_'.join(str(x) for x in args.l_gnn_layer_index)
+    args.sch_inject_at = [int(x) for x in args.sch_inject_at.split('_')] if args.sch_inject_at else []
     args.freq = 'h'  # ScaleWeave requires this attribute
     return args
 

@@ -7,7 +7,7 @@ python main.py \
   --data=custom_flight \
   --data_path=Flight.csv \
   --dropout=0.05 \
-  --e_layers=2 \
+  --e_layers=3 \
   --enc_in=7 \
   --eta_min=1e-08 \
   --features=M \
@@ -17,7 +17,6 @@ python main.py \
   --in_dropout=0.05 \
   --itr=1 \
   --label_len=0 \
-  --layer_index=3*0* \
   --learned_hyperedge_weights=0 \
   --learning_rate=0.0003 \
   --lradj=COS \

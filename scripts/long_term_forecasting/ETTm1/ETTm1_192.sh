@@ -12,7 +12,6 @@ python main.py \
     --freq=0 \
     --in_dropout=0.1 \
     --itr=1 \
-    --layer_index=3*0* \
     --learning_rate=0.001 \
     --lradj=COS \
     --model=ScaleWeave \

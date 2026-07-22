@@ -17,7 +17,6 @@ python main.py \
     --in_dropout=0.0 \
     --itr=1 \
     --label_len=0 \
-    --layer_index=3*0* \
     --learning_rate=1e-3 \
     --lradj=COS \
     --model=ScaleWeave \
